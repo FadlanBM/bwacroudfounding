@@ -18,7 +18,7 @@ func main() {
 
 	userRepository:=user.NewRepository(db)
 	userService:=user.NewService(userRepository)
-	
+
 	userController:=controller.NewUserHandler(userService)
 
 	router:=gin.Default()
@@ -26,20 +26,6 @@ func main() {
 
 
 	api.POST("/users",userController.RegisterUser)
+	api.POST("/session",userController.Login)
 	router.Run()
-
-
-	// var users []user.User
-
-	// if err:=config.DB.Find(&users).Error;err!=nil{
-	// 	log.Print("connect gagal")
-	// }
-
-	// for _, user := range users {
-    //     log.Println(user.Name)
-    // }
-
-	// router:=gin.Default()
-	// router.GET("/users",handler)
-	// router.Run()
 }
