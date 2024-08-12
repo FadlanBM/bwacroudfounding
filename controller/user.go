@@ -3,6 +3,7 @@ package controller
 import (
 	"bwastartup/helper"
 	"bwastartup/user"
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -62,5 +63,40 @@ func (h *userHandler) Login(c *gin.Context){
 
 	formatter:=user.FormatUsers(accuntVerifed,"sasadasdasdsad")
 	res:=helper.NewResponse("Accunt has been Login",http.StatusOK,"success",formatter)
+	c.JSON(http.StatusOK,res)
+}
+
+func (h *userHandler) CheckEmailAvailability(c *gin.Context){
+	var input user.CheckEmailInput
+	err :=c.ShouldBindBodyWithJSON(&input)
+	
+	if err !=nil {
+		errors:=helper.FormatValidationInputError(err)
+		errorMessage:=gin.H{"errors":errors}
+		res:=helper.NewResponse("Email Checking account failed",http.StatusUnprocessableEntity,"error",errorMessage)
+		c.JSON(http.StatusUnprocessableEntity,res)
+		return
+	}
+
+	isEmailAvailable,err:=h.userService.IsEmailAvailable(input)
+	if err!=nil {
+		errorMessage:=gin.H{"errors":err}
+		res:=helper.NewResponse("Email Checking account failed",http.StatusUnprocessableEntity,"error",errorMessage)
+		c.JSON(http.StatusUnprocessableEntity,res)
+		return
+	}
+
+	fmt.Print(isEmailAvailable)
+
+	data:=gin.H{
+		"is_available":isEmailAvailable,
+	}
+
+	metaMessage:="Email tidak tersedia"
+	if isEmailAvailable {
+		metaMessage="Email sudah tersedia"
+	}
+	
+	res:=helper.NewResponse(metaMessage,http.StatusOK,"success",data)
 	c.JSON(http.StatusOK,res)
 }

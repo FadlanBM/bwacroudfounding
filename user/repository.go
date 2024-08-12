@@ -23,7 +23,7 @@ func(r *repository) Save(user User) (User, error) {
 		return user,err
 	}
 	return user,nil
-}
+} 
 
 func (r *repository)FindByEmail(email string)(User,error){
 	var user User
