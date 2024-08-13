@@ -10,23 +10,22 @@ import (
 )
 
 func main() {
-	db,err:=config.Database()
+	db, err := config.Database()
 
-	if err!= nil {
-        log.Fatalf("Error connecting to the database: %v", err)
-    }
+	if err != nil {
+		log.Fatalf("Error connecting to the database: %v", err)
+	}
 
-	userRepository:=user.NewRepository(db)
-	userService:=user.NewService(userRepository)
+	userRepository := user.NewRepository(db)
+	userService := user.NewService(userRepository)
+	userController := controller.NewUserHandler(userService)
 
-	userController:=controller.NewUserHandler(userService)
+	router := gin.Default()
+	api := router.Group("/api/v1")
 
-	router:=gin.Default()
-	api:=router.Group("/api/v1")
-
-
-	api.POST("/users",userController.RegisterUser)
-	api.POST("/session",userController.Login)
-	api.POST("/email_checkers",userController.CheckEmailAvailability)
+	api.POST("/users", userController.RegisterUser)
+	api.POST("/session", userController.Login)
+	api.POST("/email_checkers", userController.CheckEmailAvailability)
+	api.POST("/avatar", userController.UploadAvatar)
 	router.Run()
 }
