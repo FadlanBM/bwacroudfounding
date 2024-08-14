@@ -21,9 +21,14 @@ func main() {
 	userRepository := user.NewRepository(db)
 	userService := user.NewService(userRepository)
 	authService := auth.NewService()
+	token,err:=authService.ValidateToken("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxOX0.2fE63FXAZaNE3t-gnis-rvU8mBQrSaO1HpPO752SILw")
+	if err!=nil {
+		fmt.Println("Lagi Error")
+	}
+	if token.Valid {
+		fmt.Println("Token Valid")
+	}
 	userController := controller.NewUserHandler(userService,authService)
-
-	fmt.Println(authService.GenerateToken(34))
 	router := gin.Default()
 	api := router.Group("/api/v1")
 
