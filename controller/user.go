@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"bwastartup/auth"
 	"bwastartup/helper"
 	"bwastartup/user"
 	"fmt"
@@ -15,10 +16,11 @@ import (
 
 type userHandler struct {
 	userService user.Service
+	authService auth.Service
 }
 
-func NewUserHandler(userService user.Service) *userHandler {
-	return &userHandler{userService: userService}
+func NewUserHandler(userService user.Service,authService auth.Service) *userHandler {
+	return &userHandler{userService: userService,authService: authService}
 }
 
 func (h *userHandler) RegisterUser(c *gin.Context) {
@@ -39,8 +41,15 @@ func (h *userHandler) RegisterUser(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, res)
 		return
 	}
+	token, err := h.authService.GenerateToken(newUser.ID)
+	if err!=nil {
+		errorMessage := gin.H{"errors": err.Error()}
+		res := helper.NewResponse("Login account failed", http.StatusInternalServerError, "error", errorMessage)
+		c.JSON(http.StatusInternalServerError, res)
+		return
+	}
 
-	formatter := user.FormatUsers(newUser, "LoramIsoumDorSitAmet")
+	formatter := user.FormatUsers(newUser, token)
 	res := helper.NewResponse("Accunt has been registered", http.StatusOK, "success", formatter)
 	c.JSON(http.StatusOK, res)
 }
@@ -57,15 +66,22 @@ func (h *userHandler) Login(c *gin.Context) {
 		return
 	}
 
-	accuntVerifed, err := h.userService.Login(input)
+	accounVerify, err := h.userService.Login(input)
 	if err != nil {
 		errorMessage := gin.H{"errors": err.Error()}
 		res := helper.NewResponse("Login account failed", http.StatusUnprocessableEntity, "error", errorMessage)
 		c.JSON(http.StatusUnprocessableEntity, res)
 		return
 	}
+	token, err := h.authService.GenerateToken(accounVerify.ID)
+	if err!=nil {
+		errorMessage := gin.H{"errors": err.Error()}
+		res := helper.NewResponse("Login account failed", http.StatusInternalServerError, "error", errorMessage)
+		c.JSON(http.StatusInternalServerError, res)
+		return
+	}
 
-	formatter := user.FormatUsers(accuntVerifed, "sasadasdasdsad")
+	formatter := user.FormatUsers(accounVerify, token)
 	res := helper.NewResponse("Accunt has been Login", http.StatusOK, "success", formatter)
 	c.JSON(http.StatusOK, res)
 }
